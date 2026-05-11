@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFFF5F5F5)) {
+                Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFFF1F8E9)) {
                     SholatApp()
                 }
             }
@@ -40,44 +40,51 @@ fun SholatApp() {
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // SYARAT: Text & Modifier (Kerapihan Layout)
+        // SYARAT: Text & Modifier (Judul Aplikasi)
         Text(
-            text = "JADWAL SHOLAT HARI INI",
+            text = "PENGINGAT SHOLAT",
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.ExtraBold,
             color = Color(0xFF2E7D32),
-            modifier = Modifier.padding(bottom = 16.dp, top = 8.dp)
+            modifier = Modifier.padding(bottom = 4.dp, top = 8.dp)
+        )
+        Text(
+            text = "Asisten Ibadah Harian Anda",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color(0xFF689F38),
+            modifier = Modifier.padding(bottom = 20.dp)
         )
 
-        // SYARAT: Menampilkan 3-5 data (Daftar Sholat)
+        // SYARAT: Menampilkan 3-5 data (Fitur Ibadah)
         LazyColumn(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(SholatSource.daftarSholat) { sholat ->
-                SholatItem(sholat)
+            items(SholatSource.daftarFitur) { fitur ->
+                FiturCard(fitur)
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Footer Informasi (Component: Card & Column)
+        // Identitas Mahasiswa (Kerapihan Layout)
         Card(
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9)),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFC8E6C9)),
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
+            Box(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
                 Text(
-                    text = "Fahmi Isma Yuda",
+                    text = "Fahmi Isma Yuda - 2417051062",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = Color(0xFF1B5E20)
-                )
-                Text(
-                    text = "NPM: 2417051062",
                     fontSize = 14.sp,
-                    color = Color.DarkGray
+                    color = Color(0xFF1B5E20)
                 )
             }
         }
@@ -85,12 +92,12 @@ fun SholatApp() {
 }
 
 @Composable
-fun SholatItem(sholat: JadwalSholat) {
-    // SYARAT: Layout Row/Column & Modifier (Padding, Kerapihan)
+fun FiturCard(fitur: FiturIbadah) {
+    // SYARAT: Card, Modifier, Padding
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Row(
@@ -99,17 +106,17 @@ fun SholatItem(sholat: JadwalSholat) {
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // SYARAT: Image (Menggunakan ikon vektor yang sesuai data)
+            // SYARAT: Image (Ikon Fitur)
             Box(
                 modifier = Modifier
-                    .size(50.dp)
-                    .background(Color(0xFFC8E6C9), RoundedCornerShape(10.dp)),
+                    .size(56.dp)
+                    .background(Color(fitur.warnaDasar).copy(alpha = 0.15f), RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = rememberVectorPainter(image = sholat.ikon),
-                    contentDescription = sholat.nama,
-                    modifier = Modifier.size(30.dp),
+                    painter = rememberVectorPainter(image = fitur.ikon),
+                    contentDescription = fitur.nama,
+                    modifier = Modifier.size(32.dp),
                     contentScale = ContentScale.Fit
                 )
             }
@@ -119,31 +126,34 @@ fun SholatItem(sholat: JadwalSholat) {
             // SYARAT: Layout Column & Text
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = sholat.nama,
+                    text = fitur.nama,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black
+                    color = Color(0xFF1B5E20)
                 )
                 Text(
-                    text = sholat.waktu,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
+                    text = fitur.deskripsi,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray,
+                    lineHeight = 16.sp
                 )
             }
 
+            Spacer(modifier = Modifier.width(8.dp))
+
             // SYARAT: Button
             Button(
-                onClick = { /* Aksi klik */ },
+                onClick = { /* Aksi fitur */ },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (sholat.status == "Sudah") Color(0xFF4CAF50) else Color(0xFFFF9800)
+                    containerColor = Color(fitur.warnaDasar)
                 ),
-                shape = RoundedCornerShape(8.dp),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                shape = RoundedCornerShape(10.dp),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
             ) {
                 Text(
-                    text = sholat.status,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold
+                    text = fitur.labelTombol,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
