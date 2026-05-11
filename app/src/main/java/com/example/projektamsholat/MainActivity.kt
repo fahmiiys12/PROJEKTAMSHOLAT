@@ -10,7 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,22 +40,20 @@ fun SholatApp() {
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // SYARAT: Text & Modifier (Judul Aplikasi)
         Text(
-            text = "PENGINGAT SHOLAT",
+            text = "ASISTEN IBADAH HARIAN",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.ExtraBold,
             color = Color(0xFF2E7D32),
             modifier = Modifier.padding(bottom = 4.dp, top = 8.dp)
         )
         Text(
-            text = "Asisten Ibadah Harian Anda",
+            text = "Teman Ibadah Digital Kamu",
             style = MaterialTheme.typography.bodyMedium,
             color = Color(0xFF689F38),
             modifier = Modifier.padding(bottom = 20.dp)
         )
 
-        // SYARAT: Menampilkan 3-5 data (Fitur Ibadah)
         LazyColumn(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -67,7 +65,6 @@ fun SholatApp() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Identitas Mahasiswa (Kerapihan Layout)
         Card(
             colors = CardDefaults.cardColors(containerColor = Color(0xFFC8E6C9)),
             modifier = Modifier.fillMaxWidth(),
@@ -93,7 +90,21 @@ fun SholatApp() {
 
 @Composable
 fun FiturCard(fitur: FiturIbadah) {
-    // SYARAT: Card, Modifier, Padding
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text(fitur.nama) },
+            text = { Text("Fitur ${fitur.nama} akan segera hadir dalam pembaruan berikutnya.") },
+            confirmButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("Tutup")
+                }
+            }
+        )
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
@@ -106,7 +117,6 @@ fun FiturCard(fitur: FiturIbadah) {
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // SYARAT: Image (Ikon Fitur)
             Box(
                 modifier = Modifier
                     .size(56.dp)
@@ -123,7 +133,6 @@ fun FiturCard(fitur: FiturIbadah) {
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            // SYARAT: Layout Column & Text
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = fitur.nama,
@@ -141,9 +150,8 @@ fun FiturCard(fitur: FiturIbadah) {
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            // SYARAT: Button
             Button(
-                onClick = { /* Aksi fitur */ },
+                onClick = { showDialog = true },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(fitur.warnaDasar)
                 ),

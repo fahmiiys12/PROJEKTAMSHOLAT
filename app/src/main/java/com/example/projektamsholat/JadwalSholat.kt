@@ -15,7 +15,7 @@ data class FiturIbadah(
 object SholatSource {
     val daftarFitur = listOf(
         FiturIbadah(
-            "Pengingat Sholat", 
+            "Jadwal Sholat",
             "Waktu Sholat berikutnya: Maghrib (18:05)", 
             "Atur Alarm", 
             Icons.Default.Notifications, 
@@ -36,11 +36,32 @@ object SholatSource {
             0xFF795548
         ),
         FiturIbadah(
-            "Doa & Dzikir", 
-            "Kumpulan doa harian lengkap", 
+            "Kalender Sholat", 
+            "Jadwal sholat lengkap sepanjang bulan", 
+            "Lihat Kalender", 
+            Icons.Default.DateRange, 
+            0xFFFF9800
+        ),
+        FiturIbadah(
+            "Doa & Kata Muslim", 
+            "Kumpulan doa dan kutipan inspiratif", 
             "Lihat Doa", 
             Icons.Default.Favorite, 
             0xFFE91E63
+        ),
+        FiturIbadah(
+            "Asmaul Husna", 
+            "99 nama Allah beserta maknanya", 
+            "Pelajari", 
+            Icons.Default.Star, 
+            0xFF9C27B0
+        ),
+        FiturIbadah(
+            "Donasi", 
+            "Salurkan bantuan untuk yang membutuhkan", 
+            "Infaq Sekarang", 
+            Icons.Default.ShoppingCart, 
+            0xFFF44336
         ),
         FiturIbadah(
             "Masjid Terdekat", 
