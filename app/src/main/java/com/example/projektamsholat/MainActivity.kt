@@ -37,8 +37,8 @@ class MainActivity : ComponentActivity() {
                         composable("main") {
                             SholatApp(navController)
                         }
+                        composable("alquran") { QuranScreen(navController) }
                         composable("jadwal_sholat") { DetailScreen("Jadwal Sholat", navController) }
-                        composable("alquran") { DetailScreen("Al-Qur'an Digital", navController) }
                         composable("kiblat") { DetailScreen("Arah Kiblat", navController) }
                         composable("kalender") { DetailScreen("Kalender Sholat", navController) }
                         composable("doa") { DetailScreen("Doa & Kata Muslim", navController) }
