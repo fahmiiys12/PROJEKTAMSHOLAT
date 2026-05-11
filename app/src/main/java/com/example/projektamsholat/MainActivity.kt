@@ -16,9 +16,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,7 +32,20 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFFF1F8E9)) {
-                    SholatApp()
+                    val navController = rememberNavController()
+                    NavHost(navController = navController, startDestination = "main") {
+                        composable("main") {
+                            SholatApp(navController)
+                        }
+                        composable("jadwal_sholat") { DetailScreen("Jadwal Sholat", navController) }
+                        composable("alquran") { DetailScreen("Al-Qur'an Digital", navController) }
+                        composable("kiblat") { DetailScreen("Arah Kiblat", navController) }
+                        composable("kalender") { DetailScreen("Kalender Sholat", navController) }
+                        composable("doa") { DetailScreen("Doa & Kata Muslim", navController) }
+                        composable("asmaul_husna") { DetailScreen("Asmaul Husna", navController) }
+                        composable("donasi") { DetailScreen("Donasi", navController) }
+                        composable("masjid") { DetailScreen("Masjid Terdekat", navController) }
+                    }
                 }
             }
         }
@@ -34,12 +53,49 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun SholatApp() {
+fun DetailScreen(nama: String, navController: NavController) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(text = "Halaman $nama", style = MaterialTheme.typography.headlineMedium)
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(text = "Fitur ini sedang dalam pengembangan.")
+        Spacer(modifier = Modifier.height(24.dp))
+        Button(onClick = { navController.popBackStack() }) {
+            Text("Kembali")
+        }
+    }
+}
+
+@Composable
+fun SholatApp(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp)
+                .padding(bottom = 16.dp),
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Image(
+                    painter = painterResource(id = R.drawable.banner_sholat),
+                    contentDescription = "Banner Ibadah",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+
         Text(
             text = "ASISTEN IBADAH HARIAN",
             style = MaterialTheme.typography.headlineMedium,
@@ -59,7 +115,7 @@ fun SholatApp() {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(SholatSource.daftarFitur) { fitur ->
-                FiturCard(fitur)
+                FiturCard(fitur, navController)
             }
         }
 
@@ -89,80 +145,80 @@ fun SholatApp() {
 }
 
 @Composable
-fun FiturCard(fitur: FiturIbadah) {
-    var showDialog by remember { mutableStateOf(false) }
-
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = { Text(fitur.nama) },
-            text = { Text("Fitur ${fitur.nama} akan segera hadir dalam pembaruan berikutnya.") },
-            confirmButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text("Tutup")
-                }
-            }
-        )
-    }
-
+fun FiturCard(fitur: FiturIbadah, navController: NavController) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .background(Color(fitur.warnaDasar).copy(alpha = 0.15f), RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
-            ) {
+        Column {
+            fitur.gambarResId?.let { gambar ->
                 Image(
-                    painter = rememberVectorPainter(image = fitur.ikon),
-                    contentDescription = fitur.nama,
-                    modifier = Modifier.size(32.dp),
-                    contentScale = ContentScale.Fit
+                    painter = painterResource(id = gambar),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp),
+                    contentScale = ContentScale.Crop
                 )
             }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = fitur.nama,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1B5E20)
-                )
-                Text(
-                    text = fitur.deskripsi,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray,
-                    lineHeight = 16.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Button(
-                onClick = { showDialog = true },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(fitur.warnaDasar)
-                ),
-                shape = RoundedCornerShape(10.dp),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+            Row(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = fitur.labelTombol,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .background(
+                            Color(fitur.warnaDasar).copy(alpha = 0.15f),
+                            RoundedCornerShape(12.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = rememberVectorPainter(image = fitur.ikon),
+                        contentDescription = fitur.nama,
+                        modifier = Modifier.size(32.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = fitur.nama,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1B5E20)
+                    )
+                    Text(
+                        text = fitur.deskripsi,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray,
+                        lineHeight = 16.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Button(
+                    onClick = { navController.navigate(fitur.rute) },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(fitur.warnaDasar)
+                    ),
+                    shape = RoundedCornerShape(10.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = fitur.labelTombol,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }
