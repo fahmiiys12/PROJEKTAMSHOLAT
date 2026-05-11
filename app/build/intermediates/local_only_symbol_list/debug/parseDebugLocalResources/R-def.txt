@@ -1,3 +1,9 @@
 R_DEF: Internal format may change without notice
 local
+drawable alquran_sholat
+drawable asmaulhusna_sholat
+drawable banner_sholat
+drawable doa_sholat
+drawable donasi_sholat
+drawable kiblat_sholat
 string app_name
