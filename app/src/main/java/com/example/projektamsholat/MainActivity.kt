@@ -41,8 +41,8 @@ class MainActivity : ComponentActivity() {
                         composable("jadwal_sholat") { DetailScreen("Jadwal Sholat", navController) }
                         composable("kiblat") { DetailScreen("Arah Kiblat", navController) }
                         composable("kalender") { DetailScreen("Kalender Sholat", navController) }
-                        composable("doa") { DetailScreen("Doa & Kata Muslim", navController) }
-                        composable("asmaul_husna") { DetailScreen("Asmaul Husna", navController) }
+                        composable("doa") { DoaScreen(navController) }
+                        composable("asmaul_husna") { AsmaulHusnaScreen(navController) }
                         composable("donasi") { DetailScreen("Donasi", navController) }
                         composable("masjid") { DetailScreen("Masjid Terdekat", navController) }
                     }

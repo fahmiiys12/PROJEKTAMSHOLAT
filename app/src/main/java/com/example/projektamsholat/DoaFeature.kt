@@ -1,0 +1,123 @@
+package com.example.projektamsholat
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+
+data class Doa(val judul: String, val arab: String, val latin: String, val arti: String)
+
+val daftarDoa = listOf(
+    Doa(
+        "Doa Sebelum Makan",
+        "اللَّهُمَّ بَارِكْ لَنَا فِيمَا رَزَقْتَنَا وَقِنَا عَذَابَ النَّارِ",
+        "Allohumma barik lana fiima rozaktana waqina 'adzaban naar",
+        "Ya Allah, berkahilah kami atas rezeki yang telah Engkau berikan kepada kami dan jagalah kami dari siksa api neraka."
+    ),
+    Doa(
+        "Doa Sesudah Makan",
+        "الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا وَجَعَلَنَا مُسْلِمِينَ",
+        "Alhamdulillahilladzi ath'amana wasaqana waja'alana muslimin",
+        "Segala puji bagi Allah yang telah memberi kami makan dan minum, serta menjadikan kami muslim."
+    ),
+    Doa(
+        "Doa Sebelum Tidur",
+        "بِاسْمِكَ اللَّهُمَّ أَحْيَا وَأَمُوتُ",
+        "Bismikallahumma ahya wa amuutu",
+        "Dengan nama-Mu ya Allah aku hidup dan aku mati."
+    ),
+    Doa(
+        "Doa Bangun Tidur",
+        "الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ",
+        "Alhamdulillahilladzi ahyana ba'da ma amatana wa ilaihin nushur",
+        "Segala puji bagi Allah yang telah menghidupkan kami setelah mematikan kami dan kepada-Nya lah kami kembali."
+    ),
+    Doa(
+        "Doa Kedua Orang Tua",
+        "رَبِّ اغْفِرْ لِي وَلِوَالِدَيَّ وَارْحَمْهُمَا كَمَا رَبَّيَانِي صَغِيرًا",
+        "Rabbighfir li wa liwaalidayya warhamhuma kamaa rabbayaani shaghiiraa",
+        "Tuhanku, ampunilah dosaku dan dosa kedua orang tuaku, dan sayangilah keduanya sebagaimana mereka menyayangiku di waktu kecil."
+    )
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DoaScreen(navController: NavController) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Doa & Kata Muslim") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Kembali")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFFE91E63),
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
+                )
+            )
+        }
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier.padding(padding),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(daftarDoa) { doa ->
+                DoaCard(doa)
+            }
+        }
+    }
+}
+
+@Composable
+fun DoaCard(doa: Doa) {
+    Card(
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = doa.judul,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFFE91E63)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = doa.arab,
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Right,
+                modifier = Modifier.fillMaxWidth(),
+                lineHeight = 36.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = doa.latin,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = Color.DarkGray
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = doa.arti,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray
+            )
+        }
+    }
+}
