@@ -1,8 +1,11 @@
 package com.example.projektamsholat
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
@@ -10,10 +13,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
@@ -58,99 +68,141 @@ object RetrofitClient {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PrayerTimeScreen(navController: NavController) {
-    var prayerData by remember { mutableStateOf<Jadwal?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    val scope = rememberCoroutineScope()
+data class PrayerUiState(
+    val prayerData: Jadwal? = null,
+    val isLoading: Boolean = true,
+    val errorMessage: String? = null
+)
+
+class PrayerViewModel : ViewModel() {
+    var uiState by mutableStateOf(PrayerUiState())
+        private set
+
+    init {
+        fetchData()
+    }
 
     fun fetchData() {
-        scope.launch {
-            isLoading = true
-            errorMessage = null
+        viewModelScope.launch {
+            uiState = uiState.copy(isLoading = true, errorMessage = null)
             try {
                 val sdf = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
                 val currentDate = sdf.format(Date()).split("/")
                 val response = RetrofitClient.service.getJadwal(currentDate[0], currentDate[1], currentDate[2])
                 if (response.status) {
-                    prayerData = response.data.jadwal
+                    uiState = uiState.copy(prayerData = response.data.jadwal, isLoading = false)
                 } else {
-                    errorMessage = "Gagal mengambil data dari server."
+                    uiState = uiState.copy(errorMessage = "Gagal mengambil data dari server.", isLoading = false)
                 }
             } catch (e: Exception) {
-                errorMessage = "Terjadi kesalahan koneksi."
-            } finally {
-                isLoading = false
+                uiState = uiState.copy(errorMessage = "Terjadi kesalahan koneksi.", isLoading = false)
             }
         }
     }
+}
 
-    LaunchedEffect(Unit) {
-        fetchData()
-    }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PrayerTimeScreen(navController: NavController, viewModel: PrayerViewModel = viewModel()) {
+    val uiState = viewModel.uiState
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Jadwal Sholat") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Kembali")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { fetchData() }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF4CAF50),
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White,
-                    actionIconContentColor = Color.White
-                )
-            )
-        }
+        containerColor = Color(0xFFF1F8E9)
     ) { padding ->
-        Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.Center) {
-            if (isLoading) {
-                CircularProgressIndicator(color = Color(0xFF4CAF50))
-            } else if (errorMessage != null) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = errorMessage!!, color = Color.Red)
-                    Button(onClick = { fetchData() }, modifier = Modifier.padding(top = 8.dp)) {
-                        Text("Coba Lagi")
+        Column(modifier = Modifier.padding(padding).fillMaxSize()) {
+            // Header Baru yang Konsisten
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp))
+            ) {
+                // Background atau Warna Solid dengan Gradasi
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(Color(0xFF4CAF50), Color(0xFF1B5E20))
+                            )
+                        )
+                )
+                
+                // Navigation Bar
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp, start = 8.dp, end = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Kembali", tint = Color.White)
+                    }
+                    IconButton(onClick = { viewModel.fetchData() }) {
+                        Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = Color.White)
                     }
                 }
-            } else {
-                prayerData?.let { jadwal ->
-                    val times = listOf(
-                        "Imsak" to jadwal.imsak,
-                        "Subuh" to jadwal.subuh,
-                        "Terbit" to jadwal.terbit,
-                        "Dhuha" to jadwal.dhuha,
-                        "Dzuhur" to jadwal.dzuhur,
-                        "Ashar" to jadwal.ashar,
-                        "Maghrib" to jadwal.maghrib,
-                        "Isya" to jadwal.isya
-                    )
 
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize().padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        item {
-                            Text(
-                                text = "Kota Jakarta - ${jadwal.tanggal}",
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
+                // Title Section
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(24.dp)
+                ) {
+                    Text(
+                        text = "Jadwal Sholat",
+                        color = Color.White,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                    Text(
+                        text = uiState.prayerData?.tanggal ?: "Memuat lokasi...",
+                        color = Color.White.copy(alpha = 0.8f),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
+            Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(color = Color(0xFF4CAF50))
+                } else if (uiState.errorMessage != null) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = uiState.errorMessage, color = Color.Red)
+                        Button(onClick = { viewModel.fetchData() }, modifier = Modifier.padding(top = 8.dp)) {
+                            Text("Coba Lagi")
                         }
-                        items(times) { (name, time) ->
-                            PrayerTimeItem(name, time)
+                    }
+                } else {
+                    uiState.prayerData?.let { jadwal ->
+                        val times = listOf(
+                            "Imsak" to jadwal.imsak,
+                            "Subuh" to jadwal.subuh,
+                            "Terbit" to jadwal.terbit,
+                            "Dhuha" to jadwal.dhuha,
+                            "Dzuhur" to jadwal.dzuhur,
+                            "Ashar" to jadwal.ashar,
+                            "Maghrib" to jadwal.maghrib,
+                            "Isya" to jadwal.isya
+                        )
+
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            item {
+                                Text(
+                                    text = "Kota Jakarta",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF2E7D32),
+                                    modifier = Modifier.padding(bottom = 4.dp)
+                                )
+                            }
+                            items(times) { (name, time) ->
+                                PrayerTimeItem(name, time)
+                            }
                         }
                     }
                 }

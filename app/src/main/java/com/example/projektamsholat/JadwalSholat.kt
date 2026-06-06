@@ -65,7 +65,7 @@ object SholatSource {
             "Pelajari", 
             Icons.Default.Star, 
             0xFF9C27B0,
-            R.drawable.asmaulhusna_sholat,
+            R.drawable.banner_sholat,
             rute = "asmaul_husna"
         ),
         FiturIbadah(
