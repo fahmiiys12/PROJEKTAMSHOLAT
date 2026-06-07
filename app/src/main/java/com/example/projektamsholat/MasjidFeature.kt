@@ -1,7 +1,7 @@
 package com.example.projektamsholat
 
 import android.content.Context
-import androidx.compose.foundation.Image
+import android.location.Location
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,31 +19,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.net.URL
+import java.util.Locale
 
 data class Masjid(
     val nama: String,
     val alamat: String,
     val jarak: String,
-    val rating: Float
+    val rating: Float,
+    val lat: Double = 0.0,
+    val lon: Double = 0.0
 )
-
-object MasjidSource {
-    val daftarMasjid = listOf(
-        Masjid("Masjid Istiqlal", "Jl. Taman Wijaya Kusuma, Jakarta Pusat", "2.5 km", 4.9f),
-        Masjid("Masjid Agung Al-Azhar", "Jl. Sisingamangaraja, Jakarta Selatan", "5.1 km", 4.8f),
-        Masjid("Masjid Cut Meutia", "Jl. Taman Cut Mutia No.1, Jakarta Pusat", "3.2 km", 4.7f),
-        Masjid("Masjid At-Tin", "Jl. Raya Jakarta-Bogor, Jakarta Timur", "8.5 km", 4.8f),
-        Masjid("Masjid Ramlie Musofa", "Jl. Danau Sunter Utara, Jakarta Utara", "10.2 km", 4.9f)
-    )
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,10 +46,21 @@ fun MasjidScreen(navController: NavController) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var currentAddress by remember { mutableStateOf("Mendeteksi lokasi...") }
+    var daftarMasjid by remember { mutableStateOf<List<Masjid>>(emptyList()) }
+    var isSearching by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
         scope.launch {
-            currentAddress = LocationHelper.getCurrentLocationName(context)
+            val location = LocationHelper.getCurrentLocation(context)
+            if (location != null) {
+                currentAddress = LocationHelper.getCurrentLocationName(context)
+                // Ambil data masjid dari API berdasarkan lokasi Lampung/Sekitarnya
+                val masjids = fetchNearbyMasjids(location)
+                daftarMasjid = masjids
+            } else {
+                currentAddress = "Lokasi tidak ditemukan"
+            }
+            isSearching = false
         }
     }
 
@@ -67,14 +73,12 @@ fun MasjidScreen(navController: NavController) {
                 .padding(padding)
         ) {
             item {
-                // Header Baru yang Konsisten
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(220.dp)
                         .clip(RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp))
                 ) {
-                    // Background Gradient
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -85,7 +89,6 @@ fun MasjidScreen(navController: NavController) {
                             )
                     )
                     
-                    // Decorative Icon in background
                     Icon(
                         imageVector = Icons.Default.LocationOn,
                         contentDescription = null,
@@ -96,7 +99,6 @@ fun MasjidScreen(navController: NavController) {
                         tint = Color.White.copy(alpha = 0.1f)
                     )
 
-                    // Navigation Bar
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -108,7 +110,6 @@ fun MasjidScreen(navController: NavController) {
                         }
                     }
 
-                    // Title Section
                     Column(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
@@ -130,11 +131,26 @@ fun MasjidScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            items(MasjidSource.daftarMasjid) { masjid ->
-                Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
-                    MasjidItem(masjid)
+            if (isSearching) {
+                item {
+                    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = Color(0xFF00C853))
+                    }
+                }
+            } else if (daftarMasjid.isEmpty()) {
+                item {
+                    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                        Text("Tidak menemukan masjid di sekitar Anda", color = Color.Gray)
+                    }
+                }
+            } else {
+                items(daftarMasjid) { masjid ->
+                    Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+                        MasjidItem(masjid)
+                    }
                 }
             }
+            item { Spacer(modifier = Modifier.height(20.dp)) }
         }
     }
 }
@@ -144,19 +160,16 @@ fun MasjidItem(masjid: Masjid) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                modifier = Modifier.size(60.dp),
+                modifier = Modifier.size(50.dp),
                 shape = CircleShape,
-                color = Color.White.copy(alpha = 0.1f)
+                color = Color(0xFF00C853).copy(alpha = 0.1f)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(Icons.Default.LocationOn, contentDescription = null, tint = Color(0xFF00C853))
@@ -180,12 +193,7 @@ fun MasjidItem(masjid: Masjid) {
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Star,
-                        contentDescription = null,
-                        modifier = Modifier.size(14.dp),
-                        tint = Color(0xFFFFC107)
-                    )
+                    Icon(Icons.Default.Star, null, modifier = Modifier.size(14.dp), tint = Color(0xFFFFC107))
                     Text(
                         text = " ${masjid.rating} • ${masjid.jarak}",
                         style = MaterialTheme.typography.bodySmall,
@@ -195,5 +203,47 @@ fun MasjidItem(masjid: Masjid) {
                 }
             }
         }
+    }
+}
+
+suspend fun fetchNearbyMasjids(userLocation: Location): List<Masjid> = withContext(Dispatchers.IO) {
+    try {
+        // Query Overpass API untuk mencari masjid dalam radius 5km dari lokasi user
+        val urlString = "https://overpass-api.de/api/interpreter?data=[out:json];node[\"amenity\"=\"place_of_worship\"][\"religion\"=\"muslim\"](around:5000,${userLocation.latitude},${userLocation.longitude});out;"
+        val response = URL(urlString).readText()
+        val json = JSONObject(response)
+        val elements = json.getJSONArray("elements")
+        
+        val results = mutableListOf<Masjid>()
+        for (i in 0 until minOf(elements.length(), 10)) {
+            val obj = elements.getJSONObject(i)
+            val tags = obj.optJSONObject("tags")
+            val name = tags?.optString("name") ?: "Masjid Tanpa Nama"
+            val lat = obj.getDouble("lat")
+            val lon = obj.getDouble("lon")
+            
+            // Hitung jarak
+            val masjidLocation = Location("").apply {
+                latitude = lat
+                longitude = lon
+            }
+            val distanceInMeters = userLocation.distanceTo(masjidLocation)
+            val distanceString = if (distanceInMeters < 1000) {
+                "${distanceInMeters.toInt()} m"
+            } else {
+                String.format(Locale.US, "%.1f km", distanceInMeters / 1000)
+            }
+
+            results.add(Masjid(
+                nama = name,
+                alamat = tags?.optString("addr:street") ?: "Sekitar lokasi Anda",
+                jarak = distanceString,
+                rating = 4.5f + (i % 5) * 0.1f // Mock rating agar bervariasi
+            ))
+        }
+        results.sortBy { it.jarak }
+        results
+    } catch (e: Exception) {
+        emptyList()
     }
 }
