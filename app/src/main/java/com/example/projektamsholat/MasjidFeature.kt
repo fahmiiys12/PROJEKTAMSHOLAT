@@ -1,5 +1,6 @@
 package com.example.projektamsholat
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,18 +13,20 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import kotlinx.coroutines.launch
 
 data class Masjid(
     val nama: String,
@@ -45,6 +48,16 @@ object MasjidSource {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MasjidScreen(navController: NavController) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var currentAddress by remember { mutableStateOf("Mendeteksi lokasi...") }
+
+    LaunchedEffect(Unit) {
+        scope.launch {
+            currentAddress = LocationHelper.getCurrentLocationName(context)
+        }
+    }
+
     Scaffold(
         containerColor = Color(0xFFF1F8E9)
     ) { padding ->
@@ -108,7 +121,7 @@ fun MasjidScreen(navController: NavController) {
                             fontWeight = FontWeight.ExtraBold
                         )
                         Text(
-                            text = "Temukan tempat ibadah di sekitar Anda",
+                            text = "Lokasi Anda: $currentAddress",
                             color = Color.White.copy(alpha = 0.8f),
                             style = MaterialTheme.typography.bodyMedium
                         )

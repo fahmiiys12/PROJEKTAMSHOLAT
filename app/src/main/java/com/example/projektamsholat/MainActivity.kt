@@ -1,8 +1,13 @@
 package com.example.projektamsholat
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -10,39 +15,71 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+
+// --- 1. DATA MODEL (Kriteria Wajib Poin 1) ---
+data class Sholat(
+    val id: Int,
+    val nama: String,
+    val waktu: String,
+    val deskripsi: String,
+    val imageRes: Int
+)
+
+data class Amalan(
+    val id: Int,
+    val judul: String,
+    val imageRes: Int
+)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
+                val context = LocalContext.current
+                
+                // Izin Notifikasi & Lokasi
+                val permissionLauncher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.RequestMultiplePermissions(),
+                    onResult = { _ -> }
+                )
+
+                LaunchedEffect(Unit) {
+                    val permissions = mutableListOf<String>()
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                    permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
+                    permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION)
+                    permissionLauncher.launch(permissions.toTypedArray())
+                }
+
                 Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFFF1F8E9)) {
                     val navController = rememberNavController()
                     NavHost(navController = navController, startDestination = "main") {
-                        composable("main") {
-                            SholatApp(navController)
-                        }
+                        composable("main") { SholatApp(navController) }
                         composable("alquran") { QuranScreen(navController) }
                         composable("jadwal_sholat") { PrayerTimeScreen(navController) }
                         composable("kiblat") { KiblatScreen(navController) }
@@ -58,47 +95,40 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun DetailScreen(nama: String, navController: NavController) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(text = "Halaman $nama", style = MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "Fitur ini sedang dalam pengembangan.")
-        Spacer(modifier = Modifier.height(24.dp))
-        Button(onClick = { navController.popBackStack() }) {
-            Text("Kembali")
-        }
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SholatApp(navController: NavController) {
-    // Data dummy untuk Rekomendasi Amalan (Poin 2)
-    val daftarAmalan = listOf(
-        "Sedekah Subuh" to R.drawable.donasi_sholat,
-        "Baca Al-Waqiah" to R.drawable.alquran_sholat,
-        "Dzikir Pagi" to R.drawable.doa_sholat,
-        "Sholat Tahajud" to R.drawable.banner_sholat
-    )
+    // --- DUMMY DATA (Kriteria Wajib Poin 1) ---
+    val daftarAmalan = remember {
+        listOf(
+            Amalan(1, "Sedekah Subuh", R.drawable.donasi_sholat),
+            Amalan(2, "Baca Al-Waqiah", R.drawable.alquran_sholat),
+            Amalan(3, "Dzikir Pagi", R.drawable.doa_sholat),
+            Amalan(4, "Sholat Tahajud", R.drawable.banner_sholat)
+        )
+    }
 
-    // Data dummy untuk 5 Waktu Sholat (Poin 3)
-    val daftarSholat = listOf(
-        Triple("Subuh", "04:35", R.drawable.banner_sholat),
-        Triple("Dzuhur", "12:00", R.drawable.banner_sholat),
-        Triple("Ashar", "15:20", R.drawable.banner_sholat),
-        Triple("Maghrib", "18:05", R.drawable.banner_sholat),
-        Triple("Isya", "19:15", R.drawable.banner_sholat)
-    )
+    val daftarSholat = remember {
+        listOf(
+            Sholat(1, "Subuh", "04:35", "Awal hari yang penuh berkah dengan sholat fajar.", R.drawable.banner_sholat),
+            Sholat(2, "Dzuhur", "12:00", "Istirahat sejenak untuk mengingat Allah di tengah hari.", R.drawable.banner_sholat),
+            Sholat(3, "Ashar", "15:20", "Penyemangat ibadah di waktu sore hari.", R.drawable.banner_sholat),
+            Sholat(4, "Maghrib", "18:05", "Menyambut malam dengan penuh kesyukuran.", R.drawable.banner_sholat),
+            Sholat(5, "Isya", "19:15", "Sholat penutup yang menenangkan hati sebelum tidur.", R.drawable.banner_sholat)
+        )
+    }
 
     Scaffold(
         containerColor = Color(0xFFF1F8E9),
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text("PENGINGAT SHOLAT", fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp) },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color(0xFF2E7D32),
+                    titleContentColor = Color.White
+                )
+            )
+        },
         bottomBar = {
             Surface(
                 color = Color(0xFFC8E6C9),
@@ -106,14 +136,12 @@ fun SholatApp(navController: NavController) {
                 shadowElevation = 8.dp
             ) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp),
+                    modifier = Modifier.fillMaxWidth().padding(12.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Fahmi Isma Yuda - 2417051062",
-                        fontWeight = FontWeight.ExtraBold,
+                        text = "Tugas Modul 6 - Praktikum Mobile",
+                        fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,
                         color = Color(0xFF1B5E20)
                     )
@@ -121,7 +149,7 @@ fun SholatApp(navController: NavController) {
             }
         }
     ) { padding ->
-        // 1. Ganti Column utama menjadi LazyColumn
+        // --- 2. STRUKTUR LAYOUT: LAZYCOLUMN (Kriteria Wajib Poin 2) ---
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -130,10 +158,11 @@ fun SholatApp(navController: NavController) {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(top = 16.dp, bottom = 24.dp)
         ) {
-            // 2. LazyRow untuk menampilkan daftar horizontal rekomendasi amalan
+            
+            // --- 2. ITEM HEADER: LAZYROW (Kriteria Wajib Poin 2) ---
             item {
                 Text(
-                    text = "Rekomendasi Amalan",
+                    text = "Rekomendasi Amalan Sunnah",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF2E7D32),
@@ -144,9 +173,9 @@ fun SholatApp(navController: NavController) {
                     contentPadding = PaddingValues(horizontal = 4.dp)
                 ) {
                     items(daftarAmalan) { amalan ->
-                        // 4. Bungkus item amalan dengan Card
+                        // --- 3. KOMPONEN CARD (Kriteria Wajib Poin 3) ---
                         Card(
-                            modifier = Modifier.width(160.dp),
+                            modifier = Modifier.width(150.dp),
                             shape = RoundedCornerShape(16.dp),
                             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                             colors = CardDefaults.cardColors(containerColor = Color.White)
@@ -156,16 +185,14 @@ fun SholatApp(navController: NavController) {
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Image(
-                                    painter = painterResource(id = amalan.second),
+                                    painter = painterResource(id = amalan.imageRes),
                                     contentDescription = null,
-                                    modifier = Modifier
-                                        .size(100.dp)
-                                        .clip(RoundedCornerShape(12.dp)),
+                                    modifier = Modifier.size(90.dp).clip(RoundedCornerShape(12.dp)),
                                     contentScale = ContentScale.Crop
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    text = amalan.first,
+                                    text = amalan.judul,
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.Bold,
                                     textAlign = TextAlign.Center,
@@ -177,60 +204,9 @@ fun SholatApp(navController: NavController) {
                 }
             }
 
-            // Banner Section
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp),
-                    shape = RoundedCornerShape(28.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                ) {
-                    Box {
-                        Image(
-                            painter = painterResource(id = R.drawable.banner_sholat),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(
-                                    Brush.verticalGradient(
-                                        colors = listOf(
-                                            Color.Black.copy(alpha = 0.2f),
-                                            Color.Black.copy(alpha = 0.8f)
-                                        )
-                                    )
-                                )
-                        )
-                        Column(
-                            modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                .padding(24.dp)
-                        ) {
-                            Text(
-                                text = "ASISTEN IBADAH",
-                                color = Color.White,
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 2.sp
-                            )
-                            Text(
-                                text = "Teman Ibadah Digital Kamu",
-                                color = Color.White,
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.ExtraBold
-                            )
-                        }
-                    }
-                }
-            }
-
             item {
                 Text(
-                    text = "Jadwal Sholat Hari Ini",
+                    text = "Jadwal Sholat 5 Waktu",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF2E7D32),
@@ -238,50 +214,67 @@ fun SholatApp(navController: NavController) {
                 )
             }
 
-            // 3. Gunakan DSL items() untuk menampilkan daftar 5 waktu sholat
+            // --- 2. BLOK ITEMS() UNTUK DAFTAR UTAMA (Kriteria Wajib Poin 2) ---
             items(daftarSholat) { sholat ->
-                // 4 & 5. Bungkus item sholat dengan Card berisi Image, Text, dan Button
+                // --- 3. DESAIN KOMPONEN ITEM (Kriteria Wajib Poin 3) ---
                 Card(
+                    onClick = { navController.navigate("jadwal_sholat") },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
                     elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
+                    // Tata letak menggunakan Row dan Column (Kriteria Wajib Poin 3)
                     Row(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
+                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Image(
-                            painter = painterResource(id = sholat.third),
+                            painter = painterResource(id = sholat.imageRes),
                             contentDescription = null,
-                            modifier = Modifier
-                                .size(60.dp)
-                                .clip(RoundedCornerShape(12.dp)),
+                            modifier = Modifier.size(85.dp).clip(RoundedCornerShape(12.dp)),
                             contentScale = ContentScale.Crop
                         )
+                        
                         Spacer(modifier = Modifier.width(16.dp))
+                        
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = sholat.first,
-                                style = MaterialTheme.typography.titleMedium,
+                                text = sholat.nama,
+                                style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF1B5E20)
                             )
                             Text(
-                                text = sholat.second,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Gray
+                                text = sholat.waktu,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Color(0xFF2E7D32),
+                                fontWeight = FontWeight.SemiBold
                             )
-                        }
-                        Button(
-                            onClick = { /* Aksi Set Pengingat */ },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
-                            shape = RoundedCornerShape(10.dp),
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
-                        ) {
-                            Text("Set Pengingat", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = sholat.deskripsi,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.DarkGray,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+                            
+                            // Button Aksi (Kriteria Wajib Poin 3)
+                            val context = LocalContext.current
+                            Button(
+                                onClick = { 
+                                    ReminderManager.setPrayerReminder(context, sholat.nama, sholat.waktu)
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                                modifier = Modifier.height(36.dp)
+                            ) {
+                                Text("Set Pengingat", fontSize = 12.sp, color = Color.White)
+                            }
                         }
                     }
                 }
@@ -297,10 +290,27 @@ fun SholatApp(navController: NavController) {
                 )
             }
 
-            // Menu Utama (FiturCard) menggunakan items()
+            // Integrasi Fitur Ibadah (Tetap dipertahankan dari versi sebelumnya)
             items(SholatSource.daftarFitur) { fitur ->
                 FiturCard(fitur, navController)
             }
+        }
+    }
+}
+
+@Composable
+fun DetailScreen(nama: String, navController: NavController) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(text = "Halaman $nama", style = MaterialTheme.typography.headlineMedium)
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(text = "Fitur ini sedang dalam pengembangan.")
+        Spacer(modifier = Modifier.height(24.dp))
+        Button(onClick = { navController.popBackStack() }) {
+            Text("Kembali")
         }
     }
 }
@@ -316,12 +326,9 @@ fun FiturCard(fitur: FiturIbadah, navController: NavController) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Container Ikon dengan Gradasi Halus
             Surface(
                 modifier = Modifier.size(56.dp),
                 shape = RoundedCornerShape(16.dp),
@@ -344,9 +351,7 @@ fun FiturCard(fitur: FiturIbadah, navController: NavController) {
                         Image(
                             painter = painterResource(id = fitur.gambarResId),
                             contentDescription = null,
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(RoundedCornerShape(8.dp)),
+                            modifier = Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)),
                             contentScale = ContentScale.Fit
                         )
                     } else {
@@ -359,9 +364,7 @@ fun FiturCard(fitur: FiturIbadah, navController: NavController) {
                     }
                 }
             }
-
             Spacer(modifier = Modifier.width(16.dp))
-
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = fitur.nama,
@@ -377,19 +380,11 @@ fun FiturCard(fitur: FiturIbadah, navController: NavController) {
                     overflow = TextOverflow.Ellipsis
                 )
             }
-
-            Surface(
-                modifier = Modifier.size(32.dp),
-                shape = RoundedCornerShape(10.dp),
-                color = Color(0xFFF1F8E9)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowRight,
-                    contentDescription = null,
-                    tint = Color(0xFF4CAF50),
-                    modifier = Modifier.padding(4.dp)
-                )
-            }
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowRight,
+                contentDescription = null,
+                tint = Color(0xFF4CAF50)
+            )
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.example.projektamsholat
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -8,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,6 +20,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -77,9 +80,18 @@ data class PrayerUiState(
 class PrayerViewModel : ViewModel() {
     var uiState by mutableStateOf(PrayerUiState())
         private set
+    
+    var currentLocationName by mutableStateOf("Memuat lokasi...")
+        private set
 
     init {
         fetchData()
+    }
+
+    fun updateLocation(context: Context) {
+        viewModelScope.launch {
+            currentLocationName = LocationHelper.getCurrentLocationName(context)
+        }
     }
 
     fun fetchData() {
@@ -105,6 +117,11 @@ class PrayerViewModel : ViewModel() {
 @Composable
 fun PrayerTimeScreen(navController: NavController, viewModel: PrayerViewModel = viewModel()) {
     val uiState = viewModel.uiState
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.updateLocation(context)
+    }
 
     Scaffold(
         containerColor = Color(0xFFF1F8E9)
@@ -157,7 +174,7 @@ fun PrayerTimeScreen(navController: NavController, viewModel: PrayerViewModel = 
                         fontWeight = FontWeight.ExtraBold
                     )
                     Text(
-                        text = uiState.prayerData?.tanggal ?: "Memuat lokasi...",
+                        text = viewModel.currentLocationName,
                         color = Color.White.copy(alpha = 0.8f),
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -193,7 +210,7 @@ fun PrayerTimeScreen(navController: NavController, viewModel: PrayerViewModel = 
                         ) {
                             item {
                                 Text(
-                                    text = "Kota Jakarta",
+                                    text = "Lokasi: ${viewModel.currentLocationName}",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = Color(0xFF2E7D32),
@@ -213,6 +230,7 @@ fun PrayerTimeScreen(navController: NavController, viewModel: PrayerViewModel = 
 
 @Composable
 fun PrayerTimeItem(name: String, time: String) {
+    val context = LocalContext.current
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -223,13 +241,24 @@ fun PrayerTimeItem(name: String, time: String) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
-            Text(
-                text = time,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF4CAF50)
-            )
+            Column {
+                Text(text = name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
+                Text(
+                    text = time,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF4CAF50)
+                )
+            }
+            IconButton(onClick = { 
+                ReminderManager.setPrayerReminder(context, name, time)
+            }) {
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = "Set Reminder",
+                    tint = Color(0xFF4CAF50)
+                )
+            }
         }
     }
 }
