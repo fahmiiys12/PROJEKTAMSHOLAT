@@ -7,7 +7,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.*
+import androidx.compose.runtime.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -61,8 +62,20 @@ val daftarDoa = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DoaScreen(navController: NavController) {
+    var searchQuery by remember { mutableStateOf("") }
+    val filteredDoa = remember(searchQuery) {
+        if (searchQuery.isEmpty()) {
+            daftarDoa
+        } else {
+            daftarDoa.filter { 
+                it.judul.contains(searchQuery, ignoreCase = true) || 
+                it.arti.contains(searchQuery, ignoreCase = true)
+            }
+        }
+    }
+
     Scaffold(
-        containerColor = Color(0xFFF1F8E9)
+        containerColor = Color(0xFF121212)
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -112,13 +125,13 @@ fun DoaScreen(navController: NavController) {
                             .padding(24.dp)
                     ) {
                         Text(
-                            text = "Doa & Kata Muslim",
+                            text = "Doa & Dzikir",
                             color = Color.White,
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.ExtraBold
                         )
                         Text(
-                            text = "Kumpulan doa harian dan kutipan bijak",
+                            text = "Kumpulan doa harian dan dzikir",
                             color = Color.White.copy(alpha = 0.8f),
                             style = MaterialTheme.typography.bodyMedium
                         )
@@ -127,9 +140,45 @@ fun DoaScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            items(daftarDoa) { doa ->
+            item {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    placeholder = { Text("Cari Doa (contoh: Makan atau Tidur)", color = Color.Gray) },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray) },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(Icons.Default.Clear, contentDescription = "Hapus", tint = Color.Gray)
+                            }
+                        }
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedBorderColor = Color(0xFF00C853),
+                        unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
+                        cursorColor = Color(0xFF00C853)
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true
+                )
+            }
+
+            items(filteredDoa) { doa ->
                 Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
                     DoaCard(doa)
+                }
+            }
+
+            if (filteredDoa.isEmpty()) {
+                item {
+                    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                        Text("Doa tidak ditemukan", color = Color.Gray)
+                    }
                 }
             }
         }
@@ -139,8 +188,8 @@ fun DoaScreen(navController: NavController) {
 @Composable
 fun DoaCard(doa: Doa) {
     Card(
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
         shape = MaterialTheme.shapes.medium,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -149,7 +198,7 @@ fun DoaCard(doa: Doa) {
                 text = doa.judul,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFFE91E63)
+                color = Color(0xFF00C853)
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
@@ -157,14 +206,15 @@ fun DoaCard(doa: Doa) {
                 style = MaterialTheme.typography.headlineSmall,
                 textAlign = TextAlign.Right,
                 modifier = Modifier.fillMaxWidth(),
-                lineHeight = 36.sp
+                lineHeight = 42.sp,
+                color = Color.White
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = doa.latin,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
-                color = Color.DarkGray
+                color = Color(0xFF69F0AE)
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(

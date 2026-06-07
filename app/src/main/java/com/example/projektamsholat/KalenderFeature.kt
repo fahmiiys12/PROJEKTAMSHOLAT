@@ -85,7 +85,7 @@ fun KalenderScreen(navController: NavController) {
     }
 
     Scaffold(
-        containerColor = Color(0xFFF1F8E9)
+        containerColor = Color(0xFF121212)
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -105,7 +105,7 @@ fun KalenderScreen(navController: NavController) {
                             .fillMaxSize()
                             .background(
                                 Brush.verticalGradient(
-                                    colors = listOf(Color(0xFFFFB74D), Color(0xFFE65100))
+                                    colors = listOf(Color(0xFFE65100), Color(0xFF121212))
                                 )
                             )
                     )
@@ -147,7 +147,7 @@ fun KalenderScreen(navController: NavController) {
             if (isLoading) {
                 item {
                     Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = Color(0xFFFF9800))
+                        CircularProgressIndicator(color = Color(0xFF00C853))
                     }
                 }
             } else if (errorMessage != null) {
@@ -171,14 +171,14 @@ fun KalenderScreen(navController: NavController) {
 fun KalenderItem(jadwal: Jadwal) {
     Card(
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(
                 text = jadwal.tanggal,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color(0xFFE65100),
+                color = Color(0xFF00C853),
                 fontSize = 14.sp
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -200,6 +200,6 @@ fun KalenderItem(jadwal: Jadwal) {
 fun SholatTimeSmall(label: String, time: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = label, fontSize = 10.sp, color = Color.Gray)
-        Text(text = time, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        Text(text = time, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
     }
 }

@@ -59,7 +59,7 @@ fun MasjidScreen(navController: NavController) {
     }
 
     Scaffold(
-        containerColor = Color(0xFFF1F8E9)
+        containerColor = Color(0xFF121212)
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -80,7 +80,7 @@ fun MasjidScreen(navController: NavController) {
                             .fillMaxSize()
                             .background(
                                 Brush.verticalGradient(
-                                    colors = listOf(Color(0xFF90A4AE), Color(0xFF455A64))
+                                    colors = listOf(Color(0xFF263238), Color(0xFF121212))
                                 )
                             )
                     )
@@ -143,8 +143,8 @@ fun MasjidScreen(navController: NavController) {
 fun MasjidItem(masjid: Masjid) {
     Card(
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -156,10 +156,10 @@ fun MasjidItem(masjid: Masjid) {
             Surface(
                 modifier = Modifier.size(60.dp),
                 shape = CircleShape,
-                color = Color(0xFFCFD8DC)
+                color = Color.White.copy(alpha = 0.1f)
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.LocationOn, contentDescription = null, tint = Color(0xFF607D8B))
+                    Icon(Icons.Default.LocationOn, contentDescription = null, tint = Color(0xFF00C853))
                 }
             }
 
@@ -169,7 +169,8 @@ fun MasjidItem(masjid: Masjid) {
                 Text(
                     text = masjid.nama,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
                 )
                 Text(
                     text = masjid.alamat,
@@ -189,7 +190,7 @@ fun MasjidItem(masjid: Masjid) {
                         text = " ${masjid.rating} • ${masjid.jarak}",
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF607D8B)
+                        color = Color(0xFF00C853)
                     )
                 }
             }

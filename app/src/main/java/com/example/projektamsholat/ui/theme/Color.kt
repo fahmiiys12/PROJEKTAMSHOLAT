@@ -2,12 +2,12 @@ package com.example.projektamsholat.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val GreenDark = Color(0xFF1B5E20)
-val GreenPrimary = Color(0xFF2E7D32)
-val GreenLight = Color(0xFFC8E6C9)
-val GoldSecondary = Color(0xFFFFD700)
-val GoldDark = Color(0xFFBC9B00)
-val BackgroundLight = Color(0xFFF1F8E9)
-val SurfaceLight = Color(0xFFFFFFFF)
-val TextDark = Color(0xFF1B5E20)
-val TextGray = Color(0xFF757575)
+// Dark Theme Palette (Berdasarkan analisis image_0.png)
+val DarkBackground = Color(0xFF121212)
+val DarkSurface = Color(0xFF1E1E1E)
+val PrimaryGreen = Color(0xFF00C853) // Hijau cerah untuk kartu utama
+val AccentMint = Color(0xFF69F0AE) // Hijau mint untuk aksen
+val TextWhite = Color(0xFFFFFFFF)
+val TextGray = Color(0xFFB0B0B0)
+val DarkGreenContainer = Color(0xFF004D40) // Hijau sangat tua untuk varian container
+val CardGreen = Color(0xFF00B248) // Hijau untuk kartu sholat

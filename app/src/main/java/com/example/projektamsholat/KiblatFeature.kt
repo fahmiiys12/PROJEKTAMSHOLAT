@@ -59,7 +59,7 @@ fun KiblatScreen(navController: NavController) {
     val animatedAzimuth by animateFloatAsState(targetValue = azimuth)
 
     Scaffold(
-        containerColor = Color(0xFFF1F8E9)
+        containerColor = Color(0xFF121212)
     ) { padding ->
         Column(
             modifier = Modifier
@@ -140,8 +140,8 @@ fun KiblatScreen(navController: NavController) {
                 Surface(
                     modifier = Modifier.size(280.dp),
                     shape = RoundedCornerShape(140.dp),
-                    color = Color.White,
-                    shadowElevation = 4.dp
+                    color = Color.White.copy(alpha = 0.05f),
+                    shadowElevation = 0.dp
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
@@ -150,7 +150,7 @@ fun KiblatScreen(navController: NavController) {
                             modifier = Modifier
                                 .size(240.dp)
                                 .rotate(animatedAzimuth),
-                            tint = Color(0xFF795548)
+                            tint = Color.Gray
                         )
                     }
                 }
@@ -162,14 +162,14 @@ fun KiblatScreen(navController: NavController) {
                     modifier = Modifier
                         .size(100.dp)
                         .rotate(animatedAzimuth + 295f),
-                    tint = Color(0xFF4CAF50)
+                    tint = Color(0xFF00C853)
                 )
             }
 
             Spacer(modifier = Modifier.height(48.dp))
 
             Card(
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9)),
+                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.padding(horizontal = 24.dp)
             ) {
@@ -178,14 +178,14 @@ fun KiblatScreen(navController: NavController) {
                         text = "Kiblat: ~295°",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF2E7D32)
+                        color = Color(0xFF00C853)
                     )
                     Text(
                         text = "Pastikan Anda jauh dari perangkat elektronik atau logam besar agar sensor akurat.",
                         style = MaterialTheme.typography.bodySmall,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(top = 8.dp),
-                        color = Color(0xFF388E3C)
+                        color = Color.Gray
                     )
                 }
             }

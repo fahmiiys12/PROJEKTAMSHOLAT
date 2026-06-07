@@ -124,7 +124,7 @@ fun PrayerTimeScreen(navController: NavController, viewModel: PrayerViewModel = 
     }
 
     Scaffold(
-        containerColor = Color(0xFFF1F8E9)
+        containerColor = Color(0xFF121212)
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
             // Header Baru yang Konsisten
@@ -140,7 +140,7 @@ fun PrayerTimeScreen(navController: NavController, viewModel: PrayerViewModel = 
                         .fillMaxSize()
                         .background(
                             Brush.verticalGradient(
-                                colors = listOf(Color(0xFF4CAF50), Color(0xFF1B5E20))
+                                colors = listOf(Color(0xFF2E7D32), Color(0xFF1B5E20))
                             )
                         )
                 )
@@ -183,7 +183,7 @@ fun PrayerTimeScreen(navController: NavController, viewModel: PrayerViewModel = 
 
             Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
                 if (uiState.isLoading) {
-                    CircularProgressIndicator(color = Color(0xFF4CAF50))
+                    CircularProgressIndicator(color = Color(0xFF00C853))
                 } else if (uiState.errorMessage != null) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(text = uiState.errorMessage, color = Color.Red)
@@ -213,7 +213,7 @@ fun PrayerTimeScreen(navController: NavController, viewModel: PrayerViewModel = 
                                     text = "Lokasi: ${viewModel.currentLocationName}",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF2E7D32),
+                                    color = Color(0xFF00C853),
                                     modifier = Modifier.padding(bottom = 4.dp)
                                 )
                             }
@@ -232,8 +232,8 @@ fun PrayerTimeScreen(navController: NavController, viewModel: PrayerViewModel = 
 fun PrayerTimeItem(name: String, time: String) {
     val context = LocalContext.current
     Card(
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -242,12 +242,12 @@ fun PrayerTimeItem(name: String, time: String) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text(text = name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
+                Text(text = name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium, color = Color.White)
                 Text(
                     text = time,
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4CAF50)
+                    color = Color(0xFF00C853)
                 )
             }
             IconButton(onClick = { 
@@ -256,7 +256,7 @@ fun PrayerTimeItem(name: String, time: String) {
                 Icon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = "Set Reminder",
-                    tint = Color(0xFF4CAF50)
+                    tint = Color(0xFF00C853)
                 )
             }
         }

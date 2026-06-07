@@ -132,7 +132,7 @@ val daftarAsmaulHusna = listOf(
 @Composable
 fun AsmaulHusnaScreen(navController: NavController) {
     Scaffold(
-        containerColor = Color(0xFFF1F8E9)
+        containerColor = Color(0xFF121212)
     ) { padding ->
         Column(
             modifier = Modifier
@@ -213,8 +213,8 @@ fun AsmaulHusnaScreen(navController: NavController) {
 @Composable
 fun AsmaulHusnaCard(asma: AsmaulHusna) {
     Card(
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
         shape = MaterialTheme.shapes.medium
     ) {
         Column(
@@ -232,7 +232,7 @@ fun AsmaulHusnaCard(asma: AsmaulHusna) {
                 text = asma.arab,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF9C27B0),
+                color = Color(0xFF00C853),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
@@ -240,7 +240,8 @@ fun AsmaulHusnaCard(asma: AsmaulHusna) {
                 text = asma.latin,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = Color.White
             )
             Text(
                 text = asma.arti,
