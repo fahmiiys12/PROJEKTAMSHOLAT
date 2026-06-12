@@ -48,7 +48,6 @@ import com.example.muslimone.data.repository.SholatRepository
 import com.example.muslimone.ui.viewmodel.SholatViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.remember
-import com.example.muslimone.notification.AdzanWorker
 import com.example.muslimone.ui.theme.SholatAppTheme
 
 import com.example.muslimone.data.api.AuthApiService
@@ -60,8 +59,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        AdzanWorker.setupPeriodicWork(this)
-
         setContent {
             var isDarkTheme by remember { mutableStateOf(true) }
             
@@ -73,9 +70,6 @@ class MainActivity : ComponentActivity() {
 
                 LaunchedEffect(Unit) {
                     val permissions = mutableListOf<String>()
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        permissions.add(Manifest.permission.POST_NOTIFICATIONS)
-                    }
                     permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
                     permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION)
                     permissionLauncher.launch(permissions.toTypedArray())
